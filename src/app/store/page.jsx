@@ -3,6 +3,7 @@ import ProductCard from "@/components/ProductCard";
 const StorePage = async () => {
   const response = await fetch("https://fakestoreapi.com/products");
   const data = await response.json();
+
   return (
     <div className="min-h-screen">
       <main className="container mx-auto px-4 py-8">

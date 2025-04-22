@@ -2,19 +2,37 @@
 import Link from "next/link";
 import { useCartContext } from "@/context/Cart";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
 const NavBar = () => {
+  const router = useRouter();
   const path = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [hasToken, setHasToken] = useState(false);
 
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Store", path: "/store" },
     { name: "About", path: "/about" },
     { name: "Contact", path: "/contact" },
+    { name: "Dashboard", path: "/dashboard" },
   ];
+
   const { state } = useCartContext();
+
+  // handle user auth
+  useEffect(() => {
+    const token = Cookies.get("token");
+    if (token) setHasToken((prevState) => !prevState);
+  }, [path]);
+
+  const handleLogout = () => {
+    setHasToken(false);
+    Cookies.remove("token");
+    router.push("/");
+  };
 
   return (
     <nav className="bg-white shadow-sm">
@@ -25,25 +43,46 @@ const NavBar = () => {
             <Link href="/" className="text-xl font-bold text-gray-900">
               Next Store
             </Link>
+
             {/* User auth  */}
-            <div className="mx-2 cursor-pointer">
-              <svg
-                className="w-6 h-6 text-gray-800 dark:text-white"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M12 20a7.966 7.966 0 0 1-5.002-1.756l.002.001v-.683c0-1.794 1.492-3.25 3.333-3.25h3.334c1.84 0 3.333 1.456 3.333 3.25v.683A7.966 7.966 0 0 1 12 20ZM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10c0 5.5-4.44 9.963-9.932 10h-.138C6.438 21.962 2 17.5 2 12Zm10-5c-1.84 0-3.333 1.455-3.333 3.25S10.159 13.5 12 13.5c1.84 0 3.333-1.455 3.333-3.25S13.841 7 12 7Z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            {/* Cart items */}
+            {hasToken ? (
+              <button onClick={handleLogout} className="mx-2 cursor-pointer">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="size-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15"
+                  />
+                </svg>
+              </button>
+            ) : (
+              <Link href="/login" className="mx-2 cursor-pointer">
+                <svg
+                  className="w-6 h-6 text-gray-800 dark:text-white"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M12 20a7.966 7.966 0 0 1-5.002-1.756l.002.001v-.683c0-1.794 1.492-3.25 3.333-3.25h3.334c1.84 0 3.333 1.456 3.333 3.25v.683A7.966 7.966 0 0 1 12 20ZM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10c0 5.5-4.44 9.963-9.932 10h-.138C6.438 21.962 2 17.5 2 12Zm10-5c-1.84 0-3.333 1.455-3.333 3.25S10.159 13.5 12 13.5c1.84 0 3.333-1.455 3.333-3.25S13.841 7 12 7Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </Link>
+            )}
+
+            {/* Cart basket */}
             <Link href="/checkout" className="mx-2 relative cursor-pointer">
               <svg
                 className="w-6 h-6 text-gray-800 dark:text-white"
@@ -76,10 +115,12 @@ const NavBar = () => {
           <div className="hidden md:flex md:items-center md:space-x-8">
             {navLinks.map((link) => (
               <Link
+                style={{ transition: "all .5s ease-in-out" }}
                 key={link.path}
                 href={link.path}
                 className={`
                   px-3 py-2 text-sm font-medium transition-colors
+                  ${!hasToken && link.path === "/dashboard" ? "hidden" : ""}
                   ${
                     path === link.path
                       ? "text-blue-600 border-b-2 border-blue-600"

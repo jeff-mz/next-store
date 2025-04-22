@@ -24,3 +24,12 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+.custom-bg {
+  background: url("../assets/images/banner.jpg") center center/cover no-repeat;
+}
+/* .custom-bg::after{
+  content: "";
+  position: absolute;
+  top: 0;
+  left: ;
+} */
